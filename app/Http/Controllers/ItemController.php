@@ -10,9 +10,19 @@ class ItemController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Item::all(); // JSON response
+        $query = Item::query();
+
+        if ($request->has('search') && $request->search != '') {
+            $query->where('name', 'like', '%' . $request->search . '%')
+                ->orWhere('description', 'like', '%' . $request->search . '%');
+        }
+
+        // Laravel built-in pagination
+        $items = $query->orderBy('id', 'desc')->paginate(5); // 5 items per page
+
+        return response()->json($items);
     }
 
     /**
